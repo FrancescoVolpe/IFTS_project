@@ -1,0 +1,10 @@
+1) Riceveerà un prompt dall'utente con autenticazione, che sia Applicazione o Postman;
+2) Controlla che ò'autenticazione sia corretta;
+3) Recupera l'utente corrente;
+4) Controlla che l'utente sia attivo;
+5) Prende il prompt e lo passa ad una AI che faccia il prompt enhancer e controlli che la richiesta dell'immagine sia borderline;
+6) Il prompt migliorato verrà mandato ad una AI per generare l'immagine;
+7) L'immagine viene presa e salvata su Minio con un id;
+8) Viene mandata l'immagine ad una AI che ci ritorna la descrizione dettagliata dell'immagine e dei tag e categorie e colori predominanti, a questa AI va mandata la lista dei tag già presenti;
+9) questi dati dell'immagine vanno salvati su MongoDB, salvando anche i descrittori degli step precedenti e creando gli array vuoti delle reazioni e dei commenti;
+10) Ritorna il json dell'immagine con il link per recuperarla da dentro Minio;

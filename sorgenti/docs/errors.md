@@ -1,0 +1,17 @@
+Codici erorre
+ERR003 = Email non valida
+ERR004 = Password non corretta (deve essere lunga almeno 8 caratteri e contenere una maiuscola, un numero e un carattere speciale)
+ERR005 = Il nome deve essere lungo almeno 2 caratteri
+ERR006 = Il cognome deve essere lungo almeno 2 caratteri
+ERR007 = Utente già presente
+ERR008 = Pincode non corretto
+ERR009 = Utente già presente
+ERR010 = Utente non in pending
+ERR011 = Pincode non corretto
+ERR012 = Username o password non corretti
+ERR013 = Access token not valid
+ERR014 = Utente non attivo
+ERR015 = Qualcosa è andato storto
+ERR016 = Qualcosa è andato storto
+ERR017 = Pincode non corretto
+ERR018 = Utente non autorizzato (nel post immagine)
