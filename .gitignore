@@ -1,31 +1,26 @@
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
 # Environment
 .env
-
-# Docker persistent data
-data/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-
-# Logs
-*.log
 
 # Python
 __pycache__/
 *.pyc
+.venv/
 
 # Node
 node_modules/
 
-# Flutter/Dart
-.dart_tool/
-build/
+# Data folders
+data/mongodb/
+data/postgres/
+data/n8n/
 
-# Temporary
+# Generic build folders
+build/
 tmp/
 temp/
