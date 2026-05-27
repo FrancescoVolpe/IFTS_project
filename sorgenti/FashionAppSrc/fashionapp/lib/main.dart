@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:fashionapp/views/login_page.dart';
 
 void main() {
-  runApp(const mainapp());
+  runApp(const MainApp());
 }
 
-class mainapp extends StatelessWidget {
-  const mainapp({super.key});
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
       home: const LoginPage(title: 'IFTS Fashion App'),
     );
   }
