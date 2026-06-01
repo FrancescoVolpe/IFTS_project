@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:fashionapp/views/login_page.dart';
+import 'package:fashionapp/helpers/session.dart';
 
 void main() {
-  runApp(const MainApp());
+  Session session = Session();
+  runApp(MainApp(session: session));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  const MainApp({super.key, required this.session});
+
+  final Session session;
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const LoginPage(title: 'IFTS Fashion App'),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: LoginPage(session: session, title: 'IFTS Fashion App'),
     );
   }
 }
