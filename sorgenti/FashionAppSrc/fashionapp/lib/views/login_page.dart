@@ -87,15 +87,15 @@ class _LoginPageState extends State<LoginPage> {
           TextFormField(
             controller: _usernameController,
             decoration: InputDecoration(
-              labelText: 'Username',
-              prefixIcon: Icon(Icons.person),
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Inserisci username';
+                return 'Inserisci email';
               }
               return null;
             },
