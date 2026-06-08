@@ -12,6 +12,6 @@ class Logo extends StatefulWidget {
 class _LogoState extends State<Logo> {
   @override
   Widget build(BuildContext context) {
-    return Image.asset('assets/images/Logo.png', width: widget.width);
+    return Image.asset("assets/images/logo.png", width: widget.width);
   }
 }

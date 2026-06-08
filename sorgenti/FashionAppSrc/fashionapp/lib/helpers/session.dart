@@ -1,13 +1,19 @@
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class Session {
-  Color backgroundColor = const Color(0xFFEFEFEF);
-  Color primaryColor = const Color(0xFF000000);
-  Color secondaryColor = const Color.fromARGB(255, 138, 72, 18);
-  Color accentColor = const Color(0xFFFFC107);
-  Color foregroundColor = const Color(0xFF03A9F4);
+
+  String appVersion = "";
+
+  Color backgroundColor = Color(0xFFF1F7ED);
+  Color foregroundColor = Color(0xFF1E212B);
+  Color primaryColor = Color(0xFFB33951);
+  Color accentColor = Color(0xFFE3D081);
+  Color secondaryColor = Color(0xFF91C7B1);
 
   TextStyle get fieldStyle => GoogleFonts.roboto(
     fontSize: 12,
@@ -20,4 +26,11 @@ class Session {
     fontSize: 12,
     fontWeight: FontWeight.w400,
   );
+
+  Future<void> init() async {
+     final packageInfo = await PackageInfo.fromPlatform();
+     appVersion = packageInfo.version;
+  }
+
 }
+

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:fashionapp/helpers/session.dart';
+import 'package:fashionapp/widgets/loader.dart';
+import 'package:fashionapp/widgets/logo.dart';
+import 'package:fashionapp/widgets/my_button.dart';
+import 'package:fashionapp/widgets/my_textfield.dart';
+import 'package:fashionapp/widgets/output_message.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.session, required this.title});
@@ -12,144 +18,218 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final TextEditingController _ctlUsername = TextEditingController();
+  final TextEditingController _ctlPassword = TextEditingController();
 
-  bool _obscurePassword = true;
+  bool _showLoader = false;
+  bool _showError = false;
+  String _loginMessage = "";
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  void _resetPassword() {
+    debugPrint("Reset Password");
+  }
+
+  void _signUp() {
+    debugPrint("Registrati");
+  }
+
+  //Controllo che i campi siano compilati bene
+  bool _checkFields() {
+    //check username
+    if (_ctlUsername.text.isEmpty) {
+      setState(() {
+        _loginMessage = "Lo username/email non può essere vuoto/a";
+        _showError = true;
+      });
+      return false;
+    }
+
+    //check password
+    if (_ctlPassword.text.isEmpty) {
+      setState(() {
+        _loginMessage = "La password non può essere vuota";
+        _showError = true;
+      });
+      return false;
+    }
+
+    setState(() {
+      _loginMessage = "";
+      _showError = false;
+    });
+    return true;
+  }
+
+  //eseguo il login
+  Future<void> login() async {
+    if (!_checkFields()) {
+      return;
+    }
+
+    setState(() {
+      _showLoader = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() {
+      _showLoader = false;
+    });
+
+    debugPrint("finito");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Container(
-            width: 400,
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset('assets/images/Logo.png', height: 180),
-                const SizedBox(height: 32),
-                formLogin(),
-              ],
+        child: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              color: widget.session.backgroundColor,
+              child: Center(child: body()),
             ),
-          ),
+            Positioned(
+              right: 10,
+              bottom: 10,
+              child: Text(
+                "v.${widget.session.appVersion}",
+                style: GoogleFonts.roboto(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget loginContainer() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      height: 600,
-      width: 400,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black,
-            blurRadius: 24,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
+  Widget body() {
+    return Column(
+      children: [
+        Container(
+          height: 600,
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        children: [Image.asset('assets/images/Logo.png', height: 400)],
-      ),
+          child: Column(
+            children: [
+              Logo(width: 200),
+              const SizedBox(height: 12),
+              formLogin(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget formLogin() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Login',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: 32),
-
-          TextFormField(
-            controller: _usernameController,
-            decoration: InputDecoration(
-              labelText: 'Email',
+    return Container(
+      padding: EdgeInsets.all(12),
+      height: 300,
+      child: Form(
+        child: Column(
+          children: [
+            //Username
+            MyTextfield(
+              session: widget.session,
+              controller: _ctlUsername,
+              keyboardType: TextInputType.emailAddress,
+              labelText: 'Username/email',
+              hintText: 'Inserisci username o email',
               prefixIcon: Icon(Icons.email),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+            ),
+
+            const SizedBox(height: 12),
+
+            //Password
+            MyTextfield(
+              session: widget.session,
+              controller: _ctlPassword,
+              keyboardType: TextInputType.text,
+              labelText: 'Password',
+              hintText: 'Inserisci la tua password',
+              prefixIcon: Icon(Icons.lock),
+              obscureText: true,
+            ),
+
+            const SizedBox(height: 12),
+
+            //pulsante login
+            Visibility(
+              visible: !_showLoader,
+              replacement: Loader(session: widget.session, width: 40),
+              child: MyButton(
+                session: widget.session,
+                label: 'Login',
+                icon: Icons.check,
+                onPressed: login,
               ),
             ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Inserisci email';
-              }
-              return null;
-            },
-          ),
 
-          SizedBox(height: 16),
+            const SizedBox(height: 8),
 
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              prefixIcon: Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () {
+            //errore login
+            Visibility(
+              visible: _showError,
+              child: OutputMessage(
+                type: "error",
+                message: _loginMessage,
+                showCloseButton: true,
+                onClose: () {
                   setState(() {
-                    _obscurePassword = !_obscurePassword;
+                    _loginMessage = "";
+                    _showError = false;
                   });
                 },
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Inserisci password';
-              }
-              return null;
-            },
-          ),
 
-          SizedBox(height: 24),
+            const SizedBox(height: 12),
 
-          SizedBox(
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  print(_usernameController.text);
-                  print(_passwordController.text);
-                }
-              },
-              child: Text('Accedi'),
+            //Riga recupera password / registrati
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: _resetPassword,
+                  child: Text(
+                    "Dimenticata la password?",
+                    style: GoogleFonts.roboto(
+                      color: widget.session.secondaryColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                TextButton(
+                  onPressed: _signUp,
+                  child: Text(
+                    "Crea un account",
+                    style: GoogleFonts.roboto(
+                      color: widget.session.secondaryColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-
-          SizedBox(height: 12),
-
-          TextButton(onPressed: () {}, child: Text('Password dimenticata?')),
-        ],
+          ],
+        ),
       ),
     );
   }
