@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fashionapp/dto/users/login_response.dart';
 import 'package:fashionapp/helpers/session.dart';
+import 'package:fashionapp/views/signup_page.dart';
 import 'package:fashionapp/widgets/loader.dart';
 import 'package:fashionapp/widgets/logo.dart';
 import 'package:fashionapp/widgets/my_button.dart';
@@ -30,7 +32,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signUp() {
-    debugPrint("Registrati");
+     Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SignupPage(session: widget.session, title:"Registrati"),
+        ),
+      );
   }
 
   //Controllo che i campi siano compilati bene
@@ -62,15 +69,30 @@ class _LoginPageState extends State<LoginPage> {
 
   //eseguo il login
   Future<void> login() async {
+    //controllo i campi
     if (!_checkFields()) {
       return;
     }
 
+    //faccio visualizzare il loader
     setState(() {
       _showLoader = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    //await Future.delayed(const Duration(seconds: 2));
+    //Provo a fare il login
+    try {
+      LoginResponse res = await widget.session.usersService.login(_ctlUsername.text, _ctlPassword.text);
+      widget.session.accessToken = res.access_token;
+      debugPrint("Login avvenuto, qui dobbiamo aprire la homepage");
+      //TODO apertura homepage
+    } catch(e) {
+      //visualizzo errore login
+      setState(() {
+        _loginMessage = e.toString();
+        _showError = true;
+      });
+    }
 
     setState(() {
       _showLoader = false;

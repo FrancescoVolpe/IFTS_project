@@ -1,16 +1,18 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fashionapp/services/users_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:fashionapp/services/user_services.dart';
 
 class Session {
 
   String appVersion = "";
-  String baseUrl = "http://localhost:5678/webhook/v1/";
-  
-  late UserService userService;
+  String baseUrl = "http://localhost:5678/webhook/v1";
+
+  late UsersService usersService;
+  late String accessToken;
 
   Color backgroundColor = Color(0xFFF1F7ED);
   Color foregroundColor = Color(0xFF1E212B);
@@ -33,13 +35,11 @@ class Session {
   Future<void> init() async {
      final packageInfo = await PackageInfo.fromPlatform();
      appVersion = packageInfo.version;
-  }
 
-  Future<void> init() async {
-     final packageInfo = await PackageInfo.fromPlatform();
-     appVersion = packageInfo.version;
+     usersService = UsersService(this);
 
-     userService = UserService(this);
+    //qui controllo se trovo l'access token già salvato nelle settings locale dell'app
+     accessToken = "";
   }
 
 }

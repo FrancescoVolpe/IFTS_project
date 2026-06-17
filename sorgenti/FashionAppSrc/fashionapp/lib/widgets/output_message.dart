@@ -67,7 +67,7 @@ class _OutputMessageState extends State<OutputMessage> {
                     onTap: widget.onClose,
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      child:Container(
+                      child: Container(
                         width: 22,
                         alignment: Alignment.centerRight,
                         child: Icon(Icons.close, color: color, size: 20),
