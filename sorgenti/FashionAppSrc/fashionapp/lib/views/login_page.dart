@@ -22,6 +22,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _ctlUsername = TextEditingController();
   final TextEditingController _ctlPassword = TextEditingController();
+  final TextEditingController _ctlPin = TextEditingController();
+
+  bool _showPinBox = false;
+  bool _isVerifyingPin = false;
 
   bool _showLoader = false;
   bool _showError = false;
@@ -32,12 +36,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signUp() {
-     Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SignupPage(session: widget.session, title:"Registrati"),
-        ),
-      );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            SignupPage(session: widget.session, title: "Registrati"),
+      ),
+    );
   }
 
   //Controllo che i campi siano compilati bene
@@ -82,11 +87,18 @@ class _LoginPageState extends State<LoginPage> {
     //await Future.delayed(const Duration(seconds: 2));
     //Provo a fare il login
     try {
-      LoginResponse res = await widget.session.usersService.login(_ctlUsername.text, _ctlPassword.text);
+      LoginResponse res = await widget.session.usersService.login(
+        _ctlUsername.text,
+        _ctlPassword.text,
+      );
       widget.session.accessToken = res.access_token;
-      debugPrint("Login avvenuto, qui dobbiamo aprire la homepage");
+      setState(() {
+        _showPinBox = true;
+        _showError = false;
+        _loginMessage = "";
+      });
       //TODO apertura homepage
-    } catch(e) {
+    } catch (e) {
       //visualizzo errore login
       setState(() {
         _loginMessage = e.toString();
@@ -99,6 +111,46 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     debugPrint("finito");
+  }
+
+  Future<void> _verifyPin(String pin) async {
+    setState(() {
+      _isVerifyingPin = true;
+      _showError = false;
+      _loginMessage = "";
+    });
+
+    try {
+      await widget.session.usersService.verifyPin(pin);
+
+      if (!mounted) return;
+
+      debugPrint("PIN verificato");
+
+      // TODO aprire homepage
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _ctlPin.clear();
+        _loginMessage = e.toString();
+        _showError = true;
+      });
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isVerifyingPin = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctlUsername.dispose();
+    _ctlPassword.dispose();
+    _ctlPin.dispose();
+    super.dispose();
   }
 
   @override
@@ -161,98 +213,159 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget formLogin() {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       height: 300,
       child: Form(
-        child: Column(
+        child: _buildLoginContent(),
+      ),
+    );
+  }
+
+  Widget _buildLoginContent() {
+    if (_isVerifyingPin) {
+      return Center(
+        child: Loader(
+          session: widget.session,
+          width: 40,
+        ),
+      );
+    }
+
+    if (_showPinBox) {
+      return pinBox();
+    }
+
+    return Column(
+      children: [
+        MyTextfield(
+          session: widget.session,
+          controller: _ctlUsername,
+          keyboardType: TextInputType.emailAddress,
+          labelText: 'Username/email',
+          hintText: 'Inserisci username o email',
+          prefixIcon: const Icon(Icons.email),
+        ),
+        const SizedBox(height: 12),
+        MyTextfield(
+          session: widget.session,
+          controller: _ctlPassword,
+          keyboardType: TextInputType.text,
+          labelText: 'Password',
+          hintText: 'Inserisci la tua password',
+          prefixIcon: const Icon(Icons.lock),
+          obscureText: true,
+        ),
+        const SizedBox(height: 12),
+        Visibility(
+          visible: !_showLoader,
+          replacement: Loader(session: widget.session, width: 40),
+          child: MyButton(
+            session: widget.session,
+            label: 'Login',
+            icon: Icons.check,
+            onPressed: login,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Visibility(
+          visible: _showError,
+          child: OutputMessage(
+            type: "error",
+            message: _loginMessage,
+            showCloseButton: true,
+            onClose: () {
+              setState(() {
+                _loginMessage = "";
+                _showError = false;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            //Username
-            MyTextfield(
-              session: widget.session,
-              controller: _ctlUsername,
-              keyboardType: TextInputType.emailAddress,
-              labelText: 'Username/email',
-              hintText: 'Inserisci username o email',
-              prefixIcon: Icon(Icons.email),
-            ),
-
-            const SizedBox(height: 12),
-
-            //Password
-            MyTextfield(
-              session: widget.session,
-              controller: _ctlPassword,
-              keyboardType: TextInputType.text,
-              labelText: 'Password',
-              hintText: 'Inserisci la tua password',
-              prefixIcon: Icon(Icons.lock),
-              obscureText: true,
-            ),
-
-            const SizedBox(height: 12),
-
-            //pulsante login
-            Visibility(
-              visible: !_showLoader,
-              replacement: Loader(session: widget.session, width: 40),
-              child: MyButton(
-                session: widget.session,
-                label: 'Login',
-                icon: Icons.check,
-                onPressed: login,
+            TextButton(
+              onPressed: _resetPassword,
+              child: Text(
+                "Dimenticata la password?",
+                style: GoogleFonts.roboto(
+                  color: widget.session.secondaryColor,
+                  fontSize: 12,
+                ),
               ),
             ),
-
-            const SizedBox(height: 8),
-
-            //errore login
-            Visibility(
-              visible: _showError,
-              child: OutputMessage(
-                type: "error",
-                message: _loginMessage,
-                showCloseButton: true,
-                onClose: () {
-                  setState(() {
-                    _loginMessage = "";
-                    _showError = false;
-                  });
-                },
+            const SizedBox(width: 4),
+            TextButton(
+              onPressed: _signUp,
+              child: Text(
+                "Crea un account",
+                style: GoogleFonts.roboto(
+                  color: widget.session.secondaryColor,
+                  fontSize: 12,
+                ),
               ),
-            ),
-
-            const SizedBox(height: 12),
-
-            //Riga recupera password / registrati
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: _resetPassword,
-                  child: Text(
-                    "Dimenticata la password?",
-                    style: GoogleFonts.roboto(
-                      color: widget.session.secondaryColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                TextButton(
-                  onPressed: _signUp,
-                  child: Text(
-                    "Crea un account",
-                    style: GoogleFonts.roboto(
-                      color: widget.session.secondaryColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget pinBox() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Inserisci il PIN di conferma",
+          style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 20),
+
+        SizedBox(
+          width: 260,
+          child: TextField(
+            controller: _ctlPin,
+            keyboardType: TextInputType.number,
+            maxLength: 6,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.roboto(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 12,
+            ),
+            decoration: InputDecoration(
+              counterText: "",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onChanged: (value) {
+              if (value.length == 6) {
+                _verifyPin(value);
+              }
+            },
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        Visibility(
+          visible: _showError,
+          child: OutputMessage(
+            type: "error",
+            showCloseButton: true,
+            onClose: () {
+              setState(() {
+                _showError = false;
+                _loginMessage = "";
+              });
+            },
+            message: _loginMessage,
+          ),
+        ),
+      ],
     );
   }
 }

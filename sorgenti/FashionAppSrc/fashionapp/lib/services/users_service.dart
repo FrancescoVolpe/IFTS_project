@@ -45,6 +45,37 @@ class UsersService {
     return LoginResponse.fromJson(decodedBody);
   }
 
+  Future<bool> verifyPin(final String pin) async {
+    final Uri url = Uri.parse('${session.baseUrl}/verify-pin');
+
+    final http.Response response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ${session.accessToken}',
+      },
+      body: jsonEncode({
+        'pin': pin,
+      }),
+    );
+
+    final dynamic decodedBody = jsonDecode(response.body);
+
+    if (response.statusCode != 200) {
+      if (decodedBody is Map<String, dynamic>) {
+        final String errorCode = decodedBody['errorCode']?.toString() ?? 'ERR_UNKNOWN';
+        final String message = decodedBody['message']?.toString() ?? 'PIN non valido';
+
+        throw Exception('$errorCode - $message');
+      }
+
+      throw Exception('HTTP ${response.statusCode} - PIN non valido');
+    }
+
+    return true;
+  }
+
   Future<bool> signup(final SignupPost toPost) async {
 
     final Uri url = Uri.parse('${session.baseUrl}/users/signup');
